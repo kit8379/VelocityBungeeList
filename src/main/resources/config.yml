@@ -17,5 +17,6 @@ server-group:
       - infect3
 
 messages:
+    totalPlayers: '&a總線上人數: '
     reload: '&aVelocityList 已重新載入.'
     noPermission: '&c你沒有權限使用這個指令.'

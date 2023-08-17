@@ -75,6 +75,10 @@ public class ConfigHelper {
         return null;
     }
 
+    public String getTotalPlayersMessage() {
+        return Utils.colorize(configData.node("messages", "totalPlayers").getString("&aTotal players online: "));
+    }
+
     public String getReloadMessage() {
         return Utils.colorize(configData.node("messages", "reload").getString("&aVelocityList has been reloaded."));
     }

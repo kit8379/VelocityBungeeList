@@ -36,7 +36,7 @@ public class ListCommand implements SimpleCommand {
 
         // Display total player count
         int totalPlayers = api.getPlayerCount();
-        source.sendMessage(Component.text("Total players across proxies: " + totalPlayers));
+        source.sendMessage(Component.text(config.getTotalPlayersMessage() + totalPlayers));
 
         // Create a set to keep track of servers that are part of a group
         Set<String> serversInGroups = new HashSet<>();
@@ -46,11 +46,14 @@ public class ListCommand implements SimpleCommand {
             String groupName = config.getServerGroupName((String) groupKey).orElse((String) groupKey);
             List<String> serversInGroup = config.getServersInGroup((String) groupKey);
             int totalPlayersInGroup = 0;
+            StringBuilder playerNamesInGroup = new StringBuilder();
             for (String server : serversInGroup) {
-                totalPlayersInGroup += api.getPlayersOnServer(server).size();
+                Set<UUID> playersOnServer = api.getPlayersOnServer(server);
+                totalPlayersInGroup += playersOnServer.size();
+                playersOnServer.forEach(uuid -> playerNamesInGroup.append(api.getNameFromUuid(uuid)).append(", "));
                 serversInGroups.add(server);  // Add server to the set
             }
-            source.sendMessage(Component.text(groupName + ": " + totalPlayersInGroup));
+            source.sendMessage(Component.text(groupName + ": " + totalPlayersInGroup + " [" + playerNamesInGroup.toString().replaceAll(", $", "") + "]"));
         });
 
         // Retrieve all server names using Velocity
@@ -63,7 +66,9 @@ public class ListCommand implements SimpleCommand {
             if (!serversInGroups.contains(server)) {  // Check if server is not in a group
                 Set<UUID> playersOnServer = api.getPlayersOnServer(server);
                 String serverDisplayName = config.getServerName(server).orElse(server);
-                source.sendMessage(Component.text(serverDisplayName + ": " + playersOnServer.size()));
+                StringBuilder playerNames = new StringBuilder();
+                playersOnServer.forEach(uuid -> playerNames.append(api.getNameFromUuid(uuid)).append(", "));
+                source.sendMessage(Component.text(serverDisplayName + ": " + playersOnServer.size() + " [" + playerNames.toString().replaceAll(", $", "") + "]"));
             }
         }
     }
