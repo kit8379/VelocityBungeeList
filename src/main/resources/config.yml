@@ -17,8 +17,8 @@ server-group:
       - infect3
 
 messages:
-    total-players: "Total players across proxies: %total_players%"
-    server-group-format: "%group_name%: %player_count% [%player_names%]"
-    server-format: "%server_name%: %player_count% [%player_names%]"
-    reload: '&aVelocityList 已重新載入.'
-    no-permission: '&c你沒有權限使用這個指令.'
+  total-players: "&e總線上人數&f: &a%total_players%"
+  server-group-format: "&r%group_name%&r&f: &f%player_count% &f[%player_names%]"
+  server-format: "&r%server_name%&r&f: &f%player_count% &7[%player_names%]"
+  reload: '&aVelocityList 已重新載入。'
+  no-permission: '&c你沒有使用這個指令的權限。'
