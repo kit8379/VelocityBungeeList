@@ -1,0 +1,21 @@
+server-name:
+  skyblock: '天空島'
+  survival: '生存'
+
+server-group:
+  party:
+    name: '派對'
+    servers:
+      - party1
+      - party2
+      - party3
+  infect:
+    name: '感染'
+    servers:
+      - infect1
+      - infect2
+      - infect3
+
+messages:
+    reload: '&aVelocityList 已重新載入.'
+    noPermission: '&c你沒有權限使用這個指令.'
