@@ -21,4 +21,5 @@ messages:
   server-group-format: "&r%group_name%&r&f: &f%player_count% &f[%player_names%]"
   server-format: "&r%server_name%&r&f: &f%player_count% &7[%player_names%]"
   reload: '&aVelocityList 已重新載入。'
+  no-group-or-server: '&c沒有這個遊戲模式。'
   no-permission: '&c你沒有使用這個指令的權限。'

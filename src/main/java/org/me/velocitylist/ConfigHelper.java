@@ -22,7 +22,7 @@ public class ConfigHelper {
 
     public ConfigHelper(Logger logger) {
         this.logger = logger;
-        this.dataFolder = Path.of("plugins/velocitylist");
+        this.dataFolder = Path.of("plugins/VelocityList");
     }
 
     public void loadConfiguration() {
@@ -87,6 +87,9 @@ public class ConfigHelper {
         return Utils.colorize(configData.node("messages", "server-format").getString("%server_name%: %player_count% [%player_names%]"));
     }
 
+    public String getNoGroupOrServerMessage() {
+        return Utils.colorize(configData.node("messages", "no-group-or-server").getString("&cThe group or server %target% does not exist."));
+    }
 
     public String getReloadMessage() {
         return Utils.colorize(configData.node("messages", "reload").getString("&aVelocityList has been reloaded."));

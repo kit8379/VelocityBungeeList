@@ -46,7 +46,7 @@ public class ListCommand implements SimpleCommand {
                 displayServerPlayers(source, target, api);
                 return;
             } else {
-                source.sendMessage(Component.text("Invalid server or group name."));
+                source.sendMessage(Component.text(config.getNoGroupOrServerMessage().replace("%target%", target)));
                 return;
             }
         }
@@ -99,9 +99,12 @@ public class ListCommand implements SimpleCommand {
         }
     }
 
-    private void displayGroupPlayers(CommandSource source, String groupName, RedisBungeeAPI api) {
+    private void displayGroupPlayers(CommandSource source, String groupKey, RedisBungeeAPI api) {
+        // Get the translated group name
+        String groupName = config.getServerGroupName(groupKey).orElse(groupKey);
+
         // Logic to display players for a specific group
-        List<String> serversInGroup = config.getServersInGroup(groupName);
+        List<String> serversInGroup = config.getServersInGroup(groupKey);
         int totalPlayersInGroup = 0;
         StringBuilder playerNamesInGroup = new StringBuilder();
         for (String server : serversInGroup) {
@@ -116,14 +119,16 @@ public class ListCommand implements SimpleCommand {
         source.sendMessage(Component.text(groupMessage));
     }
 
-    private void displayServerPlayers(CommandSource source, String serverName, RedisBungeeAPI api) {
+    private void displayServerPlayers(CommandSource source, String serverKey, RedisBungeeAPI api) {
+        // Get the translated server name
+        String serverName = config.getServerName(serverKey).orElse(serverKey);
+
         // Logic to display players for a specific server
-        Set<UUID> playersOnServer = api.getPlayersOnServer(serverName);
-        String serverDisplayName = config.getServerName(serverName).orElse(serverName);
+        Set<UUID> playersOnServer = api.getPlayersOnServer(serverKey);
         StringBuilder playerNames = new StringBuilder();
         playersOnServer.forEach(uuid -> playerNames.append(api.getNameFromUuid(uuid)).append(", "));
         String serverMessage = config.getServerFormat()
-                .replace("%server_name%", Utils.colorize(serverDisplayName))
+                .replace("%server_name%", Utils.colorize(serverName))
                 .replace("%player_count%", String.valueOf(playersOnServer.size()))
                 .replace("%player_names%", playerNames.toString().replaceAll(", $", ""));
         source.sendMessage(Component.text(serverMessage));
