@@ -1,10 +1,10 @@
-package org.me.velocitylist.command;
+package org.me.bungeevelocitylist.velocity.command;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import net.kyori.adventure.text.Component;
-import org.me.velocitylist.ConfigHelper;
-import org.me.velocitylist.VelocityList;
+import org.me.bungeevelocitylist.shared.ConfigHelper;
+import org.me.bungeevelocitylist.velocity.VelocityList;
 
 public class ReloadCommand implements SimpleCommand {
 
@@ -20,7 +20,7 @@ public class ReloadCommand implements SimpleCommand {
     public void execute(Invocation invocation) {
         CommandSource source = invocation.source();
 
-        if (!source.hasPermission("velocitylist.admin")) {
+        if (!source.hasPermission("bungeevelocitylist.reload")) {
             source.sendMessage(Component.text(config.getNoPermissionMessage()));
             return;
         }

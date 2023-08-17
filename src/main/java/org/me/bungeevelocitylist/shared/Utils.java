@@ -1,4 +1,4 @@
-package org.me.velocitylist;
+package org.me.bungeevelocitylist.shared;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,25 +1,25 @@
 server-name:
-  skyblock: '天空島'
-  survival: '生存'
+  skyblock: 'skyblock'
+  survival: 'survival'
 
 server-group:
   party:
-    name: '派對'
+    name: 'Parties Games'
     servers:
       - party1
       - party2
       - party3
   infect:
-    name: '感染'
+    name: 'Infection Games'
     servers:
       - infect1
       - infect2
       - infect3
 
 messages:
-  total-players: "&e總線上人數&f: &a%total_players%"
+  total-players: "&eTotal online players&f: &a%total_players%"
   server-group-format: "&r%group_name%&r&f: &f%player_count% &f[%player_names%]"
   server-format: "&r%server_name%&r&f: &f%player_count% &7[%player_names%]"
-  reload: '&aVelocityList 已重新載入。'
-  no-group-or-server: '&c沒有這個遊戲模式。'
-  no-permission: '&c你沒有使用這個指令的權限。'
+  reload: '&aVelocityList is reloaded.'
+  no-group-or-server: '&cCannnot find this server.'
+  no-permission: '&cNo permission'

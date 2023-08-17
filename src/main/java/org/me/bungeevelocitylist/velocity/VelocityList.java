@@ -1,4 +1,4 @@
-package org.me.velocitylist;
+package org.me.bungeevelocitylist.velocity;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
@@ -11,13 +11,14 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import org.me.velocitylist.command.ListCommand;
-import org.me.velocitylist.command.ReloadCommand;
+import org.me.bungeevelocitylist.velocity.command.ListCommand;
+import org.me.bungeevelocitylist.velocity.command.ReloadCommand;
+import org.me.bungeevelocitylist.shared.ConfigHelper;
 
 @Plugin(
         id = "velocitylist",
         name = "VelocityList",
-        version = "1.0-SNAPSHOT",
+        version = "1.0",
         description = "A plugin to show server list",
         authors = {"TonyPak"},
         dependencies = {
