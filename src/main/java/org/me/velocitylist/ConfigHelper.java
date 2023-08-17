@@ -76,14 +76,23 @@ public class ConfigHelper {
     }
 
     public String getTotalPlayersMessage() {
-        return Utils.colorize(configData.node("messages", "totalPlayers").getString("&aTotal players online: "));
+        return Utils.colorize(configData.node("messages", "total-players").getString("Total players across proxies: %total_players%"));
     }
+
+    public String getServerGroupFormat() {
+        return Utils.colorize(configData.node("messages", "server-group-format").getString("%group_name%: %player_count% [%player_names%]"));
+    }
+
+    public String getServerFormat() {
+        return Utils.colorize(configData.node("messages", "server-format").getString("%server_name%: %player_count% [%player_names%]"));
+    }
+
 
     public String getReloadMessage() {
         return Utils.colorize(configData.node("messages", "reload").getString("&aVelocityList has been reloaded."));
     }
 
     public String getNoPermissionMessage() {
-        return Utils.colorize(configData.node("messages", "noPermission").getString("&cYou do not have permission to use this command."));
+        return Utils.colorize(configData.node("messages", "no-permission").getString("&cYou do not have permission to use this command."));
     }
 }

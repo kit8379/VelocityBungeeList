@@ -5,6 +5,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import net.kyori.adventure.text.Component;
 import org.me.velocitylist.ConfigHelper;
+import org.me.velocitylist.Utils;
 import org.me.velocitylist.VelocityList;
 
 import java.util.HashSet;
@@ -36,7 +37,8 @@ public class ListCommand implements SimpleCommand {
 
         // Display total player count
         int totalPlayers = api.getPlayerCount();
-        source.sendMessage(Component.text(config.getTotalPlayersMessage() + totalPlayers));
+        String totalPlayersMessage = config.getTotalPlayersMessage().replace("%total_players%", String.valueOf(totalPlayers));
+        source.sendMessage(Component.text(Utils.colorize(totalPlayersMessage)));
 
         // Create a set to keep track of servers that are part of a group
         Set<String> serversInGroups = new HashSet<>();
@@ -53,7 +55,11 @@ public class ListCommand implements SimpleCommand {
                 playersOnServer.forEach(uuid -> playerNamesInGroup.append(api.getNameFromUuid(uuid)).append(", "));
                 serversInGroups.add(server);  // Add server to the set
             }
-            source.sendMessage(Component.text(groupName + ": " + totalPlayersInGroup + " [" + playerNamesInGroup.toString().replaceAll(", $", "") + "]"));
+            String groupMessage = config.getServerGroupFormat()
+                    .replace("%group_name%", Utils.colorize(groupName))
+                    .replace("%player_count%", String.valueOf(totalPlayersInGroup))
+                    .replace("%player_names%", playerNamesInGroup.toString().replaceAll(", $", ""));
+            source.sendMessage(Component.text(groupMessage));
         });
 
         // Retrieve all server names using Velocity
@@ -68,7 +74,11 @@ public class ListCommand implements SimpleCommand {
                 String serverDisplayName = config.getServerName(server).orElse(server);
                 StringBuilder playerNames = new StringBuilder();
                 playersOnServer.forEach(uuid -> playerNames.append(api.getNameFromUuid(uuid)).append(", "));
-                source.sendMessage(Component.text(serverDisplayName + ": " + playersOnServer.size() + " [" + playerNames.toString().replaceAll(", $", "") + "]"));
+                String serverMessage = config.getServerFormat()
+                        .replace("%server_name%", Utils.colorize(serverDisplayName))
+                        .replace("%player_count%", String.valueOf(playersOnServer.size()))
+                        .replace("%player_names%", playerNames.toString().replaceAll(", $", ""));
+                source.sendMessage(Component.text(serverMessage));
             }
         }
     }
