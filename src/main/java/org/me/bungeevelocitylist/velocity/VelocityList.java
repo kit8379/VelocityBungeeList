@@ -20,9 +20,9 @@ import org.me.bungeevelocitylist.shared.ConfigHelper;
         name = "VelocityList",
         version = "1.0",
         description = "A plugin to show server list",
-        authors = {"TonyPak"},
+        authors = {"kit8379"},
         dependencies = {
-                @Dependency(id = "redisbungee")
+                @Dependency(id = "redisbungee", optional = true)
         }
 )
 public class VelocityList {
