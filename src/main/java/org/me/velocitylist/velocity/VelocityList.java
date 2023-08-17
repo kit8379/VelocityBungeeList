@@ -1,4 +1,4 @@
-package org.me.bungeevelocitylist.velocity;
+package org.me.velocitylist.velocity;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
@@ -11,9 +11,9 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import org.me.bungeevelocitylist.velocity.command.ListCommand;
-import org.me.bungeevelocitylist.velocity.command.ReloadCommand;
-import org.me.bungeevelocitylist.shared.ConfigHelper;
+import org.me.velocitylist.velocity.command.ListCommand;
+import org.me.velocitylist.velocity.command.ReloadCommand;
+import org.me.velocitylist.shared.ConfigHelper;
 
 @Plugin(
         id = "velocitylist",

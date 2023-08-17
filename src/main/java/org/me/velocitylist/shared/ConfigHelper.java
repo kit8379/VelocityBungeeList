@@ -1,4 +1,4 @@
-package org.me.bungeevelocitylist.shared;
+package org.me.velocitylist.shared;
 
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;

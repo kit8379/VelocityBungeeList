@@ -1,34 +1,36 @@
-package org.me.bungeevelocitylist.bungee.command;
+package org.me.velocitylist.velocity.command;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Command;
-import org.me.bungeevelocitylist.bungee.BungeeList;
-import org.me.bungeevelocitylist.shared.ConfigHelper;
-import org.me.bungeevelocitylist.shared.Utils;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.SimpleCommand;
+import net.kyori.adventure.text.Component;
+import org.me.velocitylist.shared.ConfigHelper;
+import org.me.velocitylist.shared.Utils;
+import org.me.velocitylist.velocity.VelocityList;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class ListCommand extends Command {
+public class ListCommand implements SimpleCommand {
 
-    private final BungeeList plugin;
+    private final VelocityList plugin;
     private final ConfigHelper config;
 
-    public ListCommand(BungeeList plugin, ConfigHelper config) {
-        super("list");  // The command name
+    public ListCommand(VelocityList plugin, ConfigHelper config) {
         this.plugin = plugin;
         this.config = config;
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof ProxiedPlayer) || !sender.hasPermission("bungeevelocitylist.list")) {
-            sender.sendMessage(new TextComponent(config.getNoPermissionMessage()));
+    public void execute(Invocation invocation) {
+        CommandSource source = invocation.source();
+        String[] args = invocation.arguments();
+
+        if (!source.hasPermission("bungeevelocitylist.list")) {
+            source.sendMessage(Component.text(config.getNoPermissionMessage()));
             return;
         }
 
@@ -38,13 +40,13 @@ public class ListCommand extends Command {
         if (args.length > 0) {
             String target = args[0];
             if (config.getServerGroups().containsKey(target)) {
-                displayGroupPlayers(sender, target, api);
+                displayGroupPlayers(source, target, api);
                 return;
-            } else if (plugin.getProxyServer().getServerInfo(target) != null) {
-                displayServerPlayers(sender, target, api);
+            } else if (plugin.getProxy().getServer(target).isPresent()) {
+                displayServerPlayers(source, target, api);
                 return;
             } else {
-                sender.sendMessage(new TextComponent(config.getNoGroupOrServerMessage().replace("%target%", target)));
+                source.sendMessage(Component.text(config.getNoGroupOrServerMessage().replace("%target%", target)));
                 return;
             }
         }
@@ -52,7 +54,7 @@ public class ListCommand extends Command {
         // Display total player count
         int totalPlayers = api.getPlayerCount();
         String totalPlayersMessage = config.getTotalPlayersMessage().replace("%total_players%", String.valueOf(totalPlayers));
-        sender.sendMessage(new TextComponent(Utils.colorize(totalPlayersMessage)));
+        source.sendMessage(Component.text(Utils.colorize(totalPlayersMessage)));
 
         // Create a set to keep track of servers that are part of a group
         Set<String> serversInGroups = new HashSet<>();
@@ -73,11 +75,13 @@ public class ListCommand extends Command {
                     .replace("%group_name%", Utils.colorize(groupName))
                     .replace("%player_count%", String.valueOf(totalPlayersInGroup))
                     .replace("%player_names%", playerNamesInGroup.toString().replaceAll(", $", ""));
-            sender.sendMessage(new TextComponent(groupMessage));
+            source.sendMessage(Component.text(groupMessage));
         });
 
-        // Retrieve all server names using BungeeCord
-        Set<String> allServers = plugin.getProxyServer().getServers().keySet();
+        // Retrieve all server names using Velocity
+        Set<String> allServers = plugin.getProxy().getAllServers().stream()
+                .map(serverInfo -> serverInfo.getServerInfo().getName())
+                .collect(Collectors.toSet());
 
         // Display players per server, but skip servers that are part of a group
         for (String server : allServers) {
@@ -90,12 +94,12 @@ public class ListCommand extends Command {
                         .replace("%server_name%", Utils.colorize(serverDisplayName))
                         .replace("%player_count%", String.valueOf(playersOnServer.size()))
                         .replace("%player_names%", playerNames.toString().replaceAll(", $", ""));
-                sender.sendMessage(new TextComponent(serverMessage));
+                source.sendMessage(Component.text(serverMessage));
             }
         }
     }
 
-    private void displayGroupPlayers(CommandSender sender, String groupKey, RedisBungeeAPI api) {
+    private void displayGroupPlayers(CommandSource source, String groupKey, RedisBungeeAPI api) {
         // Get the translated group name
         String groupName = config.getServerGroupName(groupKey).orElse(groupKey);
 
@@ -112,10 +116,10 @@ public class ListCommand extends Command {
                 .replace("%group_name%", Utils.colorize(groupName))
                 .replace("%player_count%", String.valueOf(totalPlayersInGroup))
                 .replace("%player_names%", playerNamesInGroup.toString().replaceAll(", $", ""));
-        sender.sendMessage(new TextComponent(groupMessage));
+        source.sendMessage(Component.text(groupMessage));
     }
 
-    private void displayServerPlayers(CommandSender sender, String serverKey, RedisBungeeAPI api) {
+    private void displayServerPlayers(CommandSource source, String serverKey, RedisBungeeAPI api) {
         // Get the translated server name
         String serverName = config.getServerName(serverKey).orElse(serverKey);
 
@@ -127,6 +131,6 @@ public class ListCommand extends Command {
                 .replace("%server_name%", Utils.colorize(serverName))
                 .replace("%player_count%", String.valueOf(playersOnServer.size()))
                 .replace("%player_names%", playerNames.toString().replaceAll(", $", ""));
-        sender.sendMessage(new TextComponent(serverMessage));
+        source.sendMessage(Component.text(serverMessage));
     }
 }
