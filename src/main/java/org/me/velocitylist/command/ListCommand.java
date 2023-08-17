@@ -27,6 +27,7 @@ public class ListCommand implements SimpleCommand {
     @Override
     public void execute(Invocation invocation) {
         CommandSource source = invocation.source();
+        String[] args = invocation.arguments();
 
         if (!source.hasPermission("synccommand.list")) {
             source.sendMessage(Component.text(config.getNoPermissionMessage()));
@@ -34,6 +35,21 @@ public class ListCommand implements SimpleCommand {
         }
 
         RedisBungeeAPI api = plugin.getApi();
+
+        // If a specific server or group is provided
+        if (args.length > 0) {
+            String target = args[0];
+            if (config.getServerGroups().containsKey(target)) {
+                displayGroupPlayers(source, target, api);
+                return;
+            } else if (plugin.getProxy().getServer(target).isPresent()) {
+                displayServerPlayers(source, target, api);
+                return;
+            } else {
+                source.sendMessage(Component.text("Invalid server or group name."));
+                return;
+            }
+        }
 
         // Display total player count
         int totalPlayers = api.getPlayerCount();
@@ -81,5 +97,35 @@ public class ListCommand implements SimpleCommand {
                 source.sendMessage(Component.text(serverMessage));
             }
         }
+    }
+
+    private void displayGroupPlayers(CommandSource source, String groupName, RedisBungeeAPI api) {
+        // Logic to display players for a specific group
+        List<String> serversInGroup = config.getServersInGroup(groupName);
+        int totalPlayersInGroup = 0;
+        StringBuilder playerNamesInGroup = new StringBuilder();
+        for (String server : serversInGroup) {
+            Set<UUID> playersOnServer = api.getPlayersOnServer(server);
+            totalPlayersInGroup += playersOnServer.size();
+            playersOnServer.forEach(uuid -> playerNamesInGroup.append(api.getNameFromUuid(uuid)).append(", "));
+        }
+        String groupMessage = config.getServerGroupFormat()
+                .replace("%group_name%", Utils.colorize(groupName))
+                .replace("%player_count%", String.valueOf(totalPlayersInGroup))
+                .replace("%player_names%", playerNamesInGroup.toString().replaceAll(", $", ""));
+        source.sendMessage(Component.text(groupMessage));
+    }
+
+    private void displayServerPlayers(CommandSource source, String serverName, RedisBungeeAPI api) {
+        // Logic to display players for a specific server
+        Set<UUID> playersOnServer = api.getPlayersOnServer(serverName);
+        String serverDisplayName = config.getServerName(serverName).orElse(serverName);
+        StringBuilder playerNames = new StringBuilder();
+        playersOnServer.forEach(uuid -> playerNames.append(api.getNameFromUuid(uuid)).append(", "));
+        String serverMessage = config.getServerFormat()
+                .replace("%server_name%", Utils.colorize(serverDisplayName))
+                .replace("%player_count%", String.valueOf(playersOnServer.size()))
+                .replace("%player_names%", playerNames.toString().replaceAll(", $", ""));
+        source.sendMessage(Component.text(serverMessage));
     }
 }
