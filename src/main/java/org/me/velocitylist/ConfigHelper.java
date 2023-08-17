@@ -22,7 +22,7 @@ public class ConfigHelper {
 
     public ConfigHelper(Logger logger) {
         this.logger = logger;
-        this.dataFolder = Path.of("plugins/VelocityList");
+        this.dataFolder = Path.of("plugins/velocitylist");
     }
 
     public void loadConfiguration() {
