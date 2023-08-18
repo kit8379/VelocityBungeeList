@@ -2,7 +2,7 @@
 
 Elevate your server listing experience to the next level! Introducing VelocityBungeeList for BungeeCord, the ultimate solution to display your server list in a chic and intuitive manner.
 
-Support RedisBungee! It menas that you can use this plugin on multiple proxies setup! (Both BungeeCord and Velocity)
+Support RedisBungee! It means that you can use this plugin on multiple proxies setup! (Both BungeeCord and Velocity)
 
 🌟 Features 🌟
 
