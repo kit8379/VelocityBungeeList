@@ -1,4 +1,4 @@
-package org.me.velocitylist.shared;
+package org.me.velocitybungeelist.shared;
 
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -22,7 +22,7 @@ public class ConfigHelper {
 
     public ConfigHelper(Logger logger) {
         this.logger = logger;
-        this.dataFolder = Path.of("plugins/VelocityList");
+        this.dataFolder = Path.of("plugins/VelocityBungeeList");
     }
 
     public void loadConfiguration() {

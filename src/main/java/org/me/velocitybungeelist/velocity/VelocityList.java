@@ -1,4 +1,4 @@
-package org.me.velocitylist.velocity;
+package org.me.velocitybungeelist.velocity;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
@@ -11,9 +11,9 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import org.me.velocitylist.velocity.command.ListCommand;
-import org.me.velocitylist.velocity.command.ReloadCommand;
-import org.me.velocitylist.shared.ConfigHelper;
+import org.me.velocitybungeelist.velocity.command.ListCommand;
+import org.me.velocitybungeelist.velocity.command.ReloadCommand;
+import org.me.velocitybungeelist.shared.ConfigHelper;
 
 @Plugin(
         id = "velocitylist",
@@ -29,7 +29,7 @@ public class VelocityList {
 
     private final Logger logger;
     private final ProxyServer proxy;
-    private RedisBungeeAPI api;
+    private RedisBungeeAPI redisBungeeAPI;
 
     @Inject
     public VelocityList(Logger logger, ProxyServer proxy) {
@@ -39,16 +39,20 @@ public class VelocityList {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        logger.info("VelocityList is starting up...");
         initialize();
+        logger.info("VelocityList has started successfully!");
     }
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
+        logger.info("VelocityList is shutting down...");
         shutdown();
+        logger.info("VelocityList has shut down successfully!");
     }
 
     public void initialize() {
-        this.api = RedisBungeeAPI.getRedisBungeeApi();
+        this.redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
         ConfigHelper configHelper = new ConfigHelper(logger);
         configHelper.loadConfiguration();
         proxy.getCommandManager().register("list", new ListCommand(this, configHelper));
@@ -56,7 +60,7 @@ public class VelocityList {
     }
 
     public void shutdown() {
-        // Shutdown the plugin
+
     }
 
     public void reload() {
@@ -66,8 +70,8 @@ public class VelocityList {
         logger.info("VelocityList has reloaded successfully!");
     }
 
-    public RedisBungeeAPI getApi() {
-        return this.api;
+    public RedisBungeeAPI getRedisBungeeAPI() {
+        return this.redisBungeeAPI;
     }
 
     public ProxyServer getProxy() {

@@ -1,10 +1,10 @@
-package org.me.velocitylist.velocity.command;
+package org.me.velocitybungeelist.velocity.command;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import net.kyori.adventure.text.Component;
-import org.me.velocitylist.shared.ConfigHelper;
-import org.me.velocitylist.velocity.VelocityList;
+import org.me.velocitybungeelist.shared.ConfigHelper;
+import org.me.velocitybungeelist.velocity.VelocityList;
 
 public class ReloadCommand implements SimpleCommand {
 
