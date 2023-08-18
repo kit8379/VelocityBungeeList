@@ -1,0 +1,4 @@
+name: VelocityBungeeList
+main: org.me.synccommand.bungee.BungeeList
+version: ${project.version}
+author: kit8379
