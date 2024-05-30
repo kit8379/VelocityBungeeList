@@ -6,6 +6,8 @@ import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import org.me.velocitybungeelist.bungee.command.ListCommand;
 import org.me.velocitybungeelist.bungee.command.ReloadCommand;
 import org.me.velocitybungeelist.shared.ConfigHelper;
+import org.me.velocitybungeelist.shared.PlayerDataAPI;
+import org.me.velocitybungeelist.shared.RedisPlayerDataAPI;
 
 import java.util.logging.Logger;
 
@@ -13,7 +15,6 @@ public class BungeeList extends Plugin {
 
     private Logger logger;
     private ProxyServer proxy;
-    private RedisBungeeAPI redisBungeeAPI;
 
     @Override
     public void onEnable() {
@@ -31,11 +32,20 @@ public class BungeeList extends Plugin {
         logger.info("BungeeList has shut down successfully!");
     }
 
-    public void initialize() {
-        this.redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
+    private void initialize() {
+        PlayerDataAPI dataAPI;
+        try {
+            RedisBungeeAPI redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
+            dataAPI = new RedisPlayerDataAPI(redisBungeeAPI);
+            logger.info("RedisBungee detected and API initialized.");
+        } catch (Exception e) {
+            dataAPI = new BungeePlayerDataAPI();
+            logger.warning("RedisBungee not found or initialization failed. Falling back to BungeePlayerDataAPI.");
+        }
+
         ConfigHelper configHelper = new ConfigHelper(logger);
         configHelper.loadConfiguration();
-        proxy.getPluginManager().registerCommand(this, new ListCommand(this, configHelper));
+        proxy.getPluginManager().registerCommand(this, new ListCommand(configHelper, dataAPI));
         proxy.getPluginManager().registerCommand(this, new ReloadCommand(this, configHelper));
     }
 
@@ -45,11 +55,11 @@ public class BungeeList extends Plugin {
     public void reload() {
         getLogger().info("BungeeList is reloading...");
         shutdown();
-        onEnable();
+        initialize();
         getLogger().info("BungeeList has reloaded successfully!");
     }
 
-    public RedisBungeeAPI getRedisBungeeAPI() {
-        return this.redisBungeeAPI;
+    public ProxyServer getProxy() {
+        return this.proxy;
     }
 }

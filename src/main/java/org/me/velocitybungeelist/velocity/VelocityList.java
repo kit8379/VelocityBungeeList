@@ -1,35 +1,26 @@
 package org.me.velocitybungeelist.velocity;
 
-import javax.inject.Inject;
-import java.util.logging.Logger;
-
+import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
-
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import org.me.velocitybungeelist.shared.ConfigHelper;
+import org.me.velocitybungeelist.shared.PlayerDataAPI;
+import org.me.velocitybungeelist.shared.RedisPlayerDataAPI;
 import org.me.velocitybungeelist.velocity.command.ListCommand;
 import org.me.velocitybungeelist.velocity.command.ReloadCommand;
-import org.me.velocitybungeelist.shared.ConfigHelper;
 
-@Plugin(
-        id = "velocitylist",
-        name = "VelocityList",
-        version = "1.0",
-        description = "A plugin to show server list",
-        authors = {"kit8379"},
-        dependencies = {
-                @Dependency(id = "redisbungee", optional = true)
-        }
-)
+import javax.inject.Inject;
+import java.util.logging.Logger;
+
+@Plugin(id = "velocitylist", name = "VelocityList", version = "1.0", description = "A plugin to show server list", authors = {"kit8379"}, dependencies = {@Dependency(id = "redisbungee", optional = true)})
 public class VelocityList {
 
     private final Logger logger;
     private final ProxyServer proxy;
-    private RedisBungeeAPI redisBungeeAPI;
 
     @Inject
     public VelocityList(Logger logger, ProxyServer proxy) {
@@ -52,15 +43,23 @@ public class VelocityList {
     }
 
     public void initialize() {
-        this.redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
+        PlayerDataAPI dataAPI;
+        try {
+            RedisBungeeAPI redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
+            dataAPI = new RedisPlayerDataAPI(redisBungeeAPI);
+            logger.info("RedisBungee detected and API initialized.");
+        } catch (Exception e) {
+            dataAPI = new VelocityPlayerDataAPI(this);
+            logger.warning("RedisBungee not found or initialization failed. Falling back to VelocityPlayerDataAPI.");
+        }
+
         ConfigHelper configHelper = new ConfigHelper(logger);
         configHelper.loadConfiguration();
-        proxy.getCommandManager().register("list", new ListCommand(this, configHelper));
+        proxy.getCommandManager().register("list", new ListCommand(this, configHelper, dataAPI));
         proxy.getCommandManager().register("listreload", new ReloadCommand(this, configHelper));
     }
 
     public void shutdown() {
-
     }
 
     public void reload() {
@@ -68,10 +67,6 @@ public class VelocityList {
         shutdown();
         initialize();
         logger.info("VelocityList has reloaded successfully!");
-    }
-
-    public RedisBungeeAPI getRedisBungeeAPI() {
-        return this.redisBungeeAPI;
     }
 
     public ProxyServer getProxy() {

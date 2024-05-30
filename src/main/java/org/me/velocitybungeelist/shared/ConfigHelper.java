@@ -32,11 +32,7 @@ public class ConfigHelper {
             }
 
             Path configFile = dataFolder.resolve("config.yml");
-            YamlConfigurationLoader loader =
-                    YamlConfigurationLoader.builder()
-                            .path(configFile)
-                            .nodeStyle(NodeStyle.BLOCK)
-                            .build();
+            YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).nodeStyle(NodeStyle.BLOCK).build();
 
             if (!Files.exists(configFile)) {
                 // Copying the default config from resources
