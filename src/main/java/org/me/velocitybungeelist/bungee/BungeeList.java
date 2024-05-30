@@ -1,8 +1,9 @@
 package org.me.velocitybungeelist.bungee;
 
+import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import de.myzelyam.api.vanish.BungeeVanishAPI;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import org.me.velocitybungeelist.bungee.command.ListCommand;
 import org.me.velocitybungeelist.bungee.command.ReloadCommand;
 import org.me.velocitybungeelist.shared.ConfigHelper;
@@ -34,6 +35,8 @@ public class BungeeList extends Plugin {
 
     private void initialize() {
         PlayerDataAPI dataAPI;
+        BungeeVanishAPI vanishAPI;
+
         try {
             RedisBungeeAPI redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
             dataAPI = new RedisPlayerDataAPI(redisBungeeAPI);
@@ -43,9 +46,18 @@ public class BungeeList extends Plugin {
             logger.warning("RedisBungee not found or initialization failed. Falling back to BungeePlayerDataAPI.");
         }
 
+        try {
+            Class.forName("de.myzelyam.api.vanish.BungeeVanishAPI");
+            vanishAPI = new BungeeVanishAPI();
+            logger.info("PremiumVanish detected and API initialized.");
+        } catch (ClassNotFoundException e) {
+            vanishAPI = null;
+            logger.warning("PremiumVanish not found. Vanish support will be disabled.");
+        }
+
         ConfigHelper configHelper = new ConfigHelper(logger);
         configHelper.loadConfiguration();
-        proxy.getPluginManager().registerCommand(this, new ListCommand(configHelper, dataAPI));
+        proxy.getPluginManager().registerCommand(this, new ListCommand(configHelper, dataAPI, vanishAPI));
         proxy.getPluginManager().registerCommand(this, new ReloadCommand(this, configHelper));
     }
 

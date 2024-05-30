@@ -1,9 +1,11 @@
 package org.me.velocitybungeelist.bungee.command;
 
+import de.myzelyam.api.vanish.BungeeVanishAPI;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import org.me.velocitybungeelist.shared.ConfigHelper;
 import org.me.velocitybungeelist.shared.PlayerDataAPI;
@@ -19,11 +21,13 @@ public class ListCommand extends Command {
 
     private final PlayerDataAPI dataAPI;
     private final ConfigHelper config;
+    private final BungeeVanishAPI vanishAPI;
 
-    public ListCommand(ConfigHelper config, PlayerDataAPI dataAPI) {
+    public ListCommand(ConfigHelper config, PlayerDataAPI dataAPI, BungeeVanishAPI vanishAPI) {
         super("list");
         this.config = config;
         this.dataAPI = dataAPI;
+        this.vanishAPI = vanishAPI;
     }
 
     @Override
@@ -59,8 +63,12 @@ public class ListCommand extends Command {
         sender.sendMessage(new TextComponent(Utils.colorize(config.getNoGroupOrServerMessage().replace("%target%", target))));
     }
 
+    @SuppressWarnings("All")
     private void displayTotalPlayerCount(CommandSender sender) {
         int totalPlayers = dataAPI.getTotalPlayerCount();
+        if (vanishAPI != null) {
+            totalPlayers -= vanishAPI.getInvisiblePlayers().size();
+        }
         String totalPlayersMessage = config.getTotalPlayersMessage().replace("%total_players%", String.valueOf(totalPlayers));
         sender.sendMessage(new TextComponent(Utils.colorize(totalPlayersMessage)));
     }
@@ -85,15 +93,19 @@ public class ListCommand extends Command {
     private String getPlayerGroupMessage(String groupKey) {
         List<String> servers = config.getServersInGroup(groupKey);
         int groupPlayerCount = servers.stream().mapToInt(server -> dataAPI.getPlayersOnServer(server).size()).sum();
+        if (vanishAPI != null) {
+            groupPlayerCount -= getInvisiblePlayerCount(servers);
+        }
 
-        String playerNames = servers.stream().flatMap(server -> dataAPI.getPlayersOnServer(server).stream()).map(dataAPI::getNameFromUuid).collect(Collectors.joining(", "));
+        String playerNames = servers.stream().flatMap(server -> dataAPI.getPlayersOnServer(server).stream()).filter(this::isPlayerVisible).map(dataAPI::getNameFromUuid).collect(Collectors.joining(", "));
 
         String groupName = config.getServerGroupName(groupKey).orElse(groupKey);
         return formatMessage(config.getServerGroupFormat(), groupName, groupPlayerCount, playerNames);
     }
 
     private String getServerMessage(String server) {
-        Set<UUID> playersOnServer = dataAPI.getPlayersOnServer(server);
+        Set<UUID> playersOnServer = dataAPI.getPlayersOnServer(server).stream().filter(this::isPlayerVisible).collect(Collectors.toSet());
+
         String playerNames = playersOnServer.stream().map(dataAPI::getNameFromUuid).collect(Collectors.joining(", "));
 
         String serverName = config.getServerName(server).orElse(server);
@@ -110,5 +122,15 @@ public class ListCommand extends Command {
 
     private void displayServerPlayers(CommandSender sender, String serverKey) {
         sender.sendMessage(new TextComponent(getServerMessage(serverKey)));
+    }
+
+    private int getInvisiblePlayerCount(List<String> servers) {
+        return (int) servers.stream().flatMap(server -> dataAPI.getPlayersOnServer(server).stream()).filter(uuid -> !isPlayerVisible(uuid)).count();
+    }
+
+    @SuppressWarnings("All")
+    private boolean isPlayerVisible(UUID uuid) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid);
+        return player == null || (vanishAPI == null || !BungeeVanishAPI.isInvisible(player));
     }
 }

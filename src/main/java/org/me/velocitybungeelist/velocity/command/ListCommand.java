@@ -2,6 +2,8 @@ package org.me.velocitybungeelist.velocity.command;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.proxy.Player;
+import de.myzelyam.api.vanish.VelocityVanishAPI;
 import net.kyori.adventure.text.Component;
 import org.me.velocitybungeelist.shared.ConfigHelper;
 import org.me.velocitybungeelist.shared.PlayerDataAPI;
@@ -19,11 +21,13 @@ public class ListCommand implements SimpleCommand {
     private final VelocityList plugin;
     private final PlayerDataAPI dataAPI;
     private final ConfigHelper config;
+    private final VelocityVanishAPI vanishAPI;
 
-    public ListCommand(VelocityList plugin, ConfigHelper config, PlayerDataAPI dataAPI) {
+    public ListCommand(VelocityList plugin, ConfigHelper config, PlayerDataAPI dataAPI, VelocityVanishAPI vanishAPI) {
         this.plugin = plugin;
         this.config = config;
         this.dataAPI = dataAPI;
+        this.vanishAPI = vanishAPI;
     }
 
     @Override
@@ -62,8 +66,12 @@ public class ListCommand implements SimpleCommand {
         source.sendMessage(Component.text(config.getNoGroupOrServerMessage().replace("%target%", target)));
     }
 
+    @SuppressWarnings("All")
     private void displayTotalPlayerCount(CommandSource source) {
         int totalPlayers = dataAPI.getTotalPlayerCount();
+        if (vanishAPI != null) {
+            totalPlayers -= vanishAPI.getInvisiblePlayers().size();
+        }
         String totalPlayersMessage = config.getTotalPlayersMessage().replace("%total_players%", String.valueOf(totalPlayers));
         source.sendMessage(Component.text(Utils.colorize(totalPlayersMessage)));
     }
@@ -88,15 +96,19 @@ public class ListCommand implements SimpleCommand {
     private String getPlayerGroupMessage(String groupKey) {
         List<String> servers = config.getServersInGroup(groupKey);
         int groupPlayerCount = servers.stream().mapToInt(server -> dataAPI.getPlayersOnServer(server).size()).sum();
+        if (vanishAPI != null) {
+            groupPlayerCount -= getInvisiblePlayerCount(servers);
+        }
 
-        String playerNames = servers.stream().flatMap(server -> dataAPI.getPlayersOnServer(server).stream()).map(dataAPI::getNameFromUuid).collect(Collectors.joining(", "));
+        String playerNames = servers.stream().flatMap(server -> dataAPI.getPlayersOnServer(server).stream()).filter(this::isPlayerVisible).map(dataAPI::getNameFromUuid).collect(Collectors.joining(", "));
 
         String groupName = config.getServerGroupName(groupKey).orElse(groupKey);
         return formatMessage(config.getServerGroupFormat(), groupName, groupPlayerCount, playerNames);
     }
 
     private String getServerMessage(String server) {
-        Set<UUID> playersOnServer = dataAPI.getPlayersOnServer(server);
+        Set<UUID> playersOnServer = dataAPI.getPlayersOnServer(server).stream().filter(this::isPlayerVisible).collect(Collectors.toSet());
+
         String playerNames = playersOnServer.stream().map(dataAPI::getNameFromUuid).collect(Collectors.joining(", "));
 
         String serverName = config.getServerName(server).orElse(server);
@@ -113,5 +125,15 @@ public class ListCommand implements SimpleCommand {
 
     private void displayServerPlayers(CommandSource source, String serverKey) {
         source.sendMessage(Component.text(getServerMessage(serverKey)));
+    }
+
+    private int getInvisiblePlayerCount(List<String> servers) {
+        return (int) servers.stream().flatMap(server -> dataAPI.getPlayersOnServer(server).stream()).filter(uuid -> !isPlayerVisible(uuid)).count();
+    }
+
+    @SuppressWarnings("All")
+    private boolean isPlayerVisible(UUID uuid) {
+        Player player = plugin.getProxy().getPlayer(uuid).orElse(null);
+        return player == null || (vanishAPI == null || !VelocityVanishAPI.isInvisible(player));
     }
 }

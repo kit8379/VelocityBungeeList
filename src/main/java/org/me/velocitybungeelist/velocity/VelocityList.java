@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
+import de.myzelyam.api.vanish.VelocityVanishAPI;
 import org.me.velocitybungeelist.shared.ConfigHelper;
 import org.me.velocitybungeelist.shared.PlayerDataAPI;
 import org.me.velocitybungeelist.shared.RedisPlayerDataAPI;
@@ -16,7 +17,7 @@ import org.me.velocitybungeelist.velocity.command.ReloadCommand;
 import javax.inject.Inject;
 import java.util.logging.Logger;
 
-@Plugin(id = "velocitylist", name = "VelocityList", version = "1.0", description = "A plugin to show server list", authors = {"kit8379"}, dependencies = {@Dependency(id = "redisbungee", optional = true)})
+@Plugin(id = "velocitylist", name = "VelocityList", version = "1.0", description = "A plugin to show server list", authors = {"kit8379"}, dependencies = {@Dependency(id = "redisbungee", optional = true), @Dependency(id = "premiumvanish", optional = true)})
 public class VelocityList {
 
     private final Logger logger;
@@ -44,6 +45,8 @@ public class VelocityList {
 
     public void initialize() {
         PlayerDataAPI dataAPI;
+        VelocityVanishAPI vanishAPI;
+
         try {
             RedisBungeeAPI redisBungeeAPI = RedisBungeeAPI.getRedisBungeeApi();
             dataAPI = new RedisPlayerDataAPI(redisBungeeAPI);
@@ -53,9 +56,18 @@ public class VelocityList {
             logger.warning("RedisBungee not found or initialization failed. Falling back to VelocityPlayerDataAPI.");
         }
 
+        try {
+            Class.forName("de.myzelyam.api.vanish.VelocityVanishAPI");
+            vanishAPI = new VelocityVanishAPI();
+            logger.info("PremiumVanish detected and API initialized.");
+        } catch (ClassNotFoundException e) {
+            vanishAPI = null;
+            logger.warning("PremiumVanish not found. Vanish support will be disabled.");
+        }
+
         ConfigHelper configHelper = new ConfigHelper(logger);
         configHelper.loadConfiguration();
-        proxy.getCommandManager().register("list", new ListCommand(this, configHelper, dataAPI));
+        proxy.getCommandManager().register("list", new ListCommand(this, configHelper, dataAPI, vanishAPI));
         proxy.getCommandManager().register("listreload", new ReloadCommand(this, configHelper));
     }
 
